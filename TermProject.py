@@ -171,6 +171,11 @@ def main():
         # 결과 출력
         results = vsm.output_results()
         print(results)
+        
+        # 결과를 엑셀 파일로 저장
+        output_file = 'question_answers_output.xlsx'
+        results.to_excel(output_file, index=False)
+        print(f"Results saved to {output_file}")
 
 if __name__ == "__main__":
     main()
