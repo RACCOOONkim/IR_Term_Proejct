@@ -44,30 +44,15 @@ def load_and_preprocess_book(file_path):
         
         print(f"Successfully read file. Total characters: {len(text)}")
         
-        start_index = text.lower().find("chapter 1")
-        if start_index == -1:
-            start_index = text.find("It is a truth universally acknowledged")
-        
-        if start_index == -1:
-            print("Could not find the start of the book content.")
-            return [], []
-        
-        text = text[start_index:]  # 책 시작 부분부터 잘라내기
-        
         chapters = []
         chapter_numbers = [3, 5, 7, 9, 11, 13, 15, 17, 19]  # 선택할 챕터 목록
         
         # 챕터 찾기
-        chapter_pattern = r"Chapter\s+(\d+|[IVXLCDM]+)"  # 정규식으로 챕터 찾기
+        chapter_pattern = r"Chapter\s+(\d+)"  # 정규식으로 챕터 찾기 (숫자만)
         chapter_matches = list(re.finditer(chapter_pattern, text, re.IGNORECASE))
         
         for i, match in enumerate(chapter_matches):
-            chapter_num = match.group(1)
-            if chapter_num.isdigit():
-                chapter_num = int(chapter_num)
-            else:
-                chapter_num = roman_to_integer(chapter_num)  # 로마 숫자 변환
-                
+            chapter_num = int(match.group(1))
             if chapter_num in chapter_numbers:  # 원하는 챕터일 경우 추출
                 if i+1 < len(chapter_matches):
                     chapter_text = text[match.start():chapter_matches[i+1].start()]
@@ -86,6 +71,7 @@ def load_and_preprocess_book(file_path):
         print(f"Error in load_and_preprocess_book: {str(e)}")
         return [], []
 
+
 # 로마 숫자 변환 함수
 def roman_to_integer(roman):
     roman_values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
@@ -99,11 +85,9 @@ def roman_to_integer(roman):
 
 # Vector Space Model 클래스
 class VectorSpaceModel:
-    def __init__(self, preprocessed_chapters):
-        """
-        Initialize the Vector Space Model with preprocessed chapters.
-        """
+    def __init__(self, preprocessed_chapters, chapter_numbers):
         self.preprocessed_chapters = preprocessed_chapters
+        self.chapter_numbers = chapter_numbers
         self.vectorizer = TfidfVectorizer()
         self.chapter_vectors = self.vectorizer.fit_transform(preprocessed_chapters)
     
@@ -127,10 +111,11 @@ class VectorSpaceModel:
         self.cosine_sim = cosine_similarity(self.query_vectors, self.chapter_vectors)
     
     def get_top_n_chapters(self, n=3):
-        """
-        Get the top N chapters for each query based on cosine similarity.
-        """
-        self.top_n_chapters = [(-cos_sim).argsort()[:n] + 1 for cos_sim in self.cosine_sim]  # +1 for chapter numbering
+            self.top_n_chapters = []
+            for cos_sim in self.cosine_sim:
+                top_indices = (-cos_sim).argsort()[:n]
+                top_chapters = [self.chapter_numbers[i] for i in top_indices]
+                self.top_n_chapters.append(top_chapters)
     
     def output_results(self):
         """
@@ -143,39 +128,25 @@ class VectorSpaceModel:
         return top_n_df
 
 def main():
-    # 책 파일 경로 설정
-    book_path = 'pandp12p.txt'
-    
-    # 책을 로드하고 전처리
+    book_path = 'cleaned_pandp12p.txt'
     chapters, chapter_numbers = load_and_preprocess_book(book_path)
     
     if chapters:
-        # Vector Space Model 초기화
-        vsm = VectorSpaceModel(chapters)
+        vsm = VectorSpaceModel(chapters, chapter_numbers)
         
-        # 질문 파일 경로 설정
-        question_file_path = 'Q&A_pride and prejudice_training 문제only(2024).xlsx'
-        
-        # 질문 로드
+        question_file_path = 'Q&A_pride and prejudice_training 문제only(2024).xlsx'
         vsm.load_questions(question_file_path)
-        
-        # 질문 벡터화
         vsm.vectorize_queries()
-        
-        # 코사인 유사도 계산
         vsm.calculate_similarity()
-        
-        # 상위 3개의 챕터 가져오기
         vsm.get_top_n_chapters(n=3)
         
-        # 결과 출력
         results = vsm.output_results()
         print(results)
         
         # 결과를 엑셀 파일로 저장
-        output_file = 'question_answers_output.xlsx'
-        results.to_excel(output_file, index=False)
-        print(f"Results saved to {output_file}")
+        #output_file = 'question_answers_output.xlsx'
+        #results.to_excel(output_file, index=False)
+        #print(f"Results saved to {output_file}")
 
 if __name__ == "__main__":
     main()
