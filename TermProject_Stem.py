@@ -73,16 +73,16 @@ def load_and_preprocess_book(file_path):
         return [], []
 
 
-# 로마 숫자 변환 함수
-def roman_to_integer(roman):
-    roman_values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
-    integer = 0
-    for i in range(len(roman)):
-        if i > 0 and roman_values[roman[i]] > roman_values[roman[i - 1]]:
-            integer += roman_values[roman[i]] - 2 * roman_values[roman[i - 1]]
-        else:
-            integer += roman_values[roman[i]]
-    return integer
+# # 로마 숫자 변환 함수
+# def roman_to_integer(roman):
+#     roman_values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+#     integer = 0
+#     for i in range(len(roman)):
+#         if i > 0 and roman_values[roman[i]] > roman_values[roman[i - 1]]:
+#             integer += roman_values[roman[i]] - 2 * roman_values[roman[i - 1]]
+#         else:
+#             integer += roman_values[roman[i]]
+#     return integer
 
 # Vector Space Model 클래스
 class VectorSpaceModel:
@@ -144,10 +144,10 @@ def main():
         results = vsm.output_results()
         print(results)
         
-        # 결과를 엑셀 파일로 저장
-        #output_file = 'question_answers_output.xlsx'
-        #results.to_excel(output_file, index=False)
-        #print(f"Results saved to {output_file}")
+        # # 결과를 엑셀 파일로 저장
+        # output_file = 'question_answers_output.xlsx'
+        # results.to_excel(output_file, index=False)
+        # print(f"Results saved to {output_file}")
 
 if __name__ == "__main__":
     main()
