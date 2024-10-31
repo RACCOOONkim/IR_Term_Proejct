@@ -3,3 +3,5 @@ pandas
 nltk
 scikit-learn
 openpyxl
+selenium
+bs4
