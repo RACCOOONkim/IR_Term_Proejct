@@ -4,7 +4,7 @@ import nltk
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
@@ -135,7 +135,7 @@ def main():
     if chapters:
         vsm = VectorSpaceModel(chapters, chapter_numbers)
         
-        question_file_path = 'Q&A_pride and prejudice_training 문제only(2024).xlsx'
+        question_file_path = 'Q&A_pride and prejudice_training.xlsx'
         vsm.load_questions(question_file_path)
         vsm.vectorize_queries()
         vsm.calculate_similarity()
